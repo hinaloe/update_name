@@ -56,10 +56,13 @@ stream.user do |s|
       p "pass beacuse this is Friends object"
     elsif s.has_key?("delete")
       p "delete event happen"
-      twitter.update("ツイ消しを見た！(#{s.delete.status.id_str})")
+      twitter.update("ツイ消しを見た！(#{s[:delete].status.id_str})")
       p s
     elsif s.has_key?("event")
       p "#{s.event} => @#{s.source.screen_name} #{s.source.text}"
+    elsif s.has_key?("warning")
+      puts "Warn code => #{s.warning.code} :::: #{s.warning.message} "
+      
     else
       
      puts "#{s.user.screen_name}\t#{s.text}"
@@ -67,16 +70,16 @@ stream.user do |s|
       case s.text
       when /RT/
         p "pass becasuse RT"
-      when /\(\@#{my_sn}\)/
-        newn = s.text.sub(/\(\@#{my_sn}\)/,"")
+      when /\(\s*\@#{my_sn}\s*\)/
+        newn = s.text.sub(/\(\s*\@#{my_sn}\s*\)/,"")
         
         begin
           prof = twitter.update_profile(:name=>newn)
         rescue => ee
           p ee
-          twitter.update("エラーが出たよっ！")
+          twitter.update("@#{s.user.screen_name} エラーが出たよっ！",:in_reply_to_status_id  => s.id_str)
         else
-          twitter.update(".@#{s.user.screen_name}により名前が#{prof.name.gsub(/\@/,' (at) ')}に変えられたみたい。")
+          twitter.update(".@#{s.user.screen_name}により名前が#{prof.name.gsub(/\@/,' (at) ')}に変えられたみたい。",:in_reply_to_status_id => s.id_str)
         end
 #        twitter.update("マッチしたんだよとりあえず @#{s.user.screen_name}のﾂｨｯﾄが")
       end
