@@ -48,8 +48,13 @@ puts me.to_yaml
 
 my_sn = me.screen_name
 
+begin
 twitter.update("#{my_sn}が起動したよっ(at #{Time.now})")
  
+rescue => se
+p se
+end
+  
 stream.user do |s|
   begin
     if s.has_key?("friends")
