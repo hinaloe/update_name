@@ -2,6 +2,6 @@
 source "https://rubygems.org"
 
 # gem "rails"
-gem "twitter"
+gem "twitter", "~> 5.6.0"
 gem "dotenv"
-gem "userstream"
+gem "userstream", "~> 1.4.0"
