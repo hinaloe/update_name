@@ -9,6 +9,7 @@ require 'user_stream'
 require 'twitter'
 require 'dotenv'
 require 'yaml'
+require File.dirname(__FILE__) + '/../conf.rb'
 #require 'oauth'
 #require "hashie"
 Dotenv.load
@@ -21,6 +22,8 @@ puts ENV["consumer_key"]
 puts ENV["consumer_secret"]
 puts ENV["access_token"]
 puts ENV["access_token_secret"]
+puts @ngword
+
 
 twitter = Twitter::REST::Client.new(
   :consumer_key => ENV["consumer_key"],
@@ -46,6 +49,8 @@ p twitter
 me = twitter.user
 puts me.to_yaml
 
+flag = 0
+
 my_sn = me.screen_name
 
 begin
@@ -55,13 +60,13 @@ rescue => se
 p se
 end
   
-stream.user do |s|
+stream.user(:replies=>false) do |s|
   begin
     if s.has_key?("friends")
       p "pass beacuse this is Friends object"
     elsif s.has_key?("delete")
       p "delete event happen"
-      twitter.update("ツイ消しを見た！(#{s[:delete].status.id_str})")
+#      twitter.update("ツイ消しを見た！(#{s[:delete].status.id_str})")
       p s
     elsif s.has_key?("event")
       p "#{s.event} => @#{s.source.screen_name} #{s.source.text}"
@@ -71,12 +76,39 @@ stream.user do |s|
     else
       
      puts "#{s.user.screen_name}\t#{s.text}"
+#     puts s.user.following
      
       case s.text
       when /RT/
         p "pass becasuse RT"
+        
+      when /restart/
+        if s.user.screen_name == my_sn
+          flag = 0
+          twitter.update("@#{s.user.screen_name} 再開するよ。" ,:in_reply_to_status_id  => s.id_str) 
+        end
+        
+      when /stop/
+        if s.user.screen_name == my_sn
+          flag = 1
+          twitter.update("@#{s.user.screen_name} わかった、停止するね。" ,:in_reply_to_status_id  => s.id_str) 
+        end
+        
       when /\(\s*\@#{my_sn}\s*\)/
         newn = s.text.sub(/\(\s*\@#{my_sn}\s*\)/,"")
+      if flag == 1
+        p "停止中なのでスルーします。(#{newn})"
+      elsif /#{@ngword}/ =~ newn 
+        
+          twitter.update("@#{s.user.screen_name} 使用できない文言が含まれてるみたい！",:in_reply_to_status_id  => s.id_str)
+          puts "#{newn} has NGword"
+
+#        elsif s.user.screen_name != my_sn && !s.user.following 
+#          puts "FF外からのリプライなので無視しました。"
+#          p s
+          
+          
+      else
         
         begin
           prof = twitter.update_profile(:name=>newn)
@@ -87,6 +119,7 @@ stream.user do |s|
           twitter.update(".@#{s.user.screen_name}により名前が#{prof.name.gsub(/\@/,' (at) ')}に変えられたみたい。",:in_reply_to_status_id => s.id_str)
         end
 #        twitter.update("マッチしたんだよとりあえず @#{s.user.screen_name}のﾂｨｯﾄが")
+      end
       end
       
     end
