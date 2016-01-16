@@ -17,11 +17,12 @@ $ bundle exec ruby lib/main.rb
 ### setup
 
 ```sh
-$ git clone https://github.com/kimama1997/update_name.git
+$ git clone https://github.com/hinaloe/update_name.git
 $ cd update_name
 $ gem install bundler
 $ bundle install
 $ vim .env
+$ vim conf.rb
 ```
 
 #### `.env` file
@@ -32,6 +33,14 @@ consumer_secret: your_consumer_secret
 access_token: your_access_token
 access_token_secret: your_consumer_secret
 ```
+
+#### `conf.rb`
+```rb
+#  coding: UTF-8
+
+@ngword = '(ngword|here|yea)'
+```
+
 
 
 

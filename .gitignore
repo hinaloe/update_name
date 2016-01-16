@@ -20,3 +20,6 @@ tmp
 vendor/bundle
 nbproject
 /nbproject/private/
+conf.rb
+vendor
+.DS_Store
